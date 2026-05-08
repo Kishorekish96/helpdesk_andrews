@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html class="dark">
+<head>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = { darkMode: 'class' }
+</script>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-900 transition duration-500">
+
+<!-- HEADER -->
+<div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-6 flex justify-between items-center shadow-lg">
+  <div>
+    <h1 class="text-3xl font-bold">👨‍🎓 Student Dashboard</h1>
+    <p class="text-sm opacity-80">Raise and track your issues</p>
+  </div>
+
+  <div class="flex gap-3">
+    <button onclick="openModal()" class="bg-white text-black px-4 py-2 rounded-lg">
+      + Create Ticket
+    </button>
+
+    <button onclick="toggleDark()" class="bg-black/30 px-4 py-2 rounded-lg">
+      🌙
+    </button>
+  </div>
+</div>
+
+<div class="p-6 grid grid-cols-2 gap-6">
+
+<!-- MY TICKETS -->
+<div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg col-span-2">
+
+  <h3 class="font-semibold mb-4 text-gray-800 dark:text-gray-200">
+  My Tickets
+</h3>
+
+  <div id="tickets"></div>
+
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center">
+
+  <div class="bg-white dark:bg-gray-800 p-6 rounded-xl w-[400px] shadow-xl">
+
+    <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Create Ticket</h2>
+
+    <!-- <input id="studentId" placeholder="Student ID"
+      class="border p-2 w-full mb-2 rounded dark:bg-gray-700 dark:text-white"> -->
+
+    <input id="title" placeholder="Title"
+      class="border p-2 w-full mb-2 rounded dark:bg-gray-700 dark:text-white">
+
+    <input id="desc" placeholder="Description"
+      class="border p-2 w-full mb-2 rounded dark:bg-gray-700 dark:text-white">
+
+    <select id="category"
+      class="border p-2 w-full mb-4 rounded dark:bg-gray-700 dark:text-white">
+      <option value="">Category</option>
+      <option value="IT">IT</option>
+      <option value="Hostel">Hostel</option>
+      <option value="Academic">Academic</option>
+    </select>
+
+    <div class="flex gap-2">
+      <button onclick="createTicket()"
+        class="bg-blue-500 text-white px-4 py-2 rounded w-full hover:bg-blue-600">
+        Submit
+      </button>
+
+      <button onclick="closeModal()"
+        class="bg-gray-400 text-white px-4 py-2 rounded w-full">
+        Cancel
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API = "http://localhost:8080/api";
+
+// Dark mode
+function toggleDark() {
+  document.documentElement.classList.toggle("dark");
+}
+
+// Modal control
+function openModal() {
+  document.getElementById("modal").classList.remove("hidden");
+}
+
+function closeModal() {
+  document.getElementById("modal").classList.add("hidden");
+}
+
+// SweetAlert success
+function successAlert(msg) {
+  Swal.fire({
+    icon: 'success',
+    title: 'Success',
+    text: msg,
+    timer: 1500,
+    showConfirmButton: false
+  });
+}
+
+// Create Ticket
+async function createTicket() {
+
+  const payload = {
+    title: title.value,
+    description: desc.value,
+    category: category.value,
+    //student_id: parseInt(studentId.value)
+    student_id: parseInt(localStorage.getItem("userId"))
+  };
+
+  await fetch(API + "/tickets", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(payload)
+  });
+
+  // reset form
+  title.value = "";
+  desc.value = "";
+  category.value = "";
+
+  closeModal();
+  successAlert("Ticket created successfully 🎉");
+
+  loadMyTickets();
+}
+
+// Load My Tickets
+async function loadMyTickets() {
+
+  const id = localStorage.getItem("userId");
+
+  console.log("Student ID from localStorage:", id);
+
+  if (!id) {
+    console.error("No userId found in localStorage");
+    return;
+  }
+
+  const res = await fetch(API + "/tickets");
+  const data = await res.json();
+
+  console.log("All Tickets:", data);
+
+  //const id = Number(localStorage.getItem("userId"));
+
+
+  console.log("LocalStorage ID:", id);
+  console.log("ID:", id, typeof id);
+
+  data.forEach(t => {
+    console.log("Ticket student_id:", t.student_id);
+  });
+
+const my = data.filter(t => String(t.student_id).trim() === String(id));
+   console.log("Filtered Tickets:", my);
+
+  const ticketsDiv = document.getElementById("tickets");
+  ticketsDiv.innerHTML = "";
+
+  if (my.length === 0) {
+    ticketsDiv.innerHTML = "<p>No tickets found</p>";
+    return;
+  }
+
+  my.forEach(t => {
+    ticketsDiv.innerHTML += `
+      <div class="p-3 mb-2 rounded bg-gray-100 dark:bg-gray-700">
+        <p class="font-semibold">${t.title}</p>
+        <p class="text-sm">${t.status}</p>
+      </div>
+    `;
+  });
+}
+// Auto reload
+//document.getElementById("studentId").addEventListener("input", loadMyTickets);
+
+
+window.onload = loadMyTickets;
+
+</script>
+
+</body>
+</html>

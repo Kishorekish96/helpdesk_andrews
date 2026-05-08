@@ -1,0 +1,239 @@
+definitions:
+  models.CreateTicketRequest:
+    properties:
+      admin_id:
+        example: 0
+        type: integer
+      category:
+        example: IT
+        type: string
+      description:
+        example: Internet slow
+        type: string
+      status:
+        example: open
+        type: string
+      student_id:
+        example: 1
+        type: integer
+      title:
+        example: WiFi issue
+        type: string
+    type: object
+  models.CreateUserRequest:
+    properties:
+      department:
+        example: IT
+        type: string
+      email:
+        example: john@gmail.com
+        type: string
+      name:
+        example: John
+        type: string
+      role:
+        example: student
+        type: string
+    type: object
+  models.ListUser:
+    properties:
+      department:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      role:
+        type: string
+    type: object
+  models.TicketResponse:
+    properties:
+      admin_name:
+        type: string
+      category:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      student_name:
+        type: string
+      title:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/admins:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all admins
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ListUser'
+            type: array
+      summary: Get admins
+  /api/tickets:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all tickets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.TicketResponse'
+            type: array
+      summary: Get all tickets
+    post:
+      consumes:
+      - application/json
+      description: Create a new ticket
+      parameters:
+      - description: Ticket
+        in: body
+        name: ticket
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTicketRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CreateTicketRequest'
+      summary: Create ticket
+  /api/tickets/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing ticket
+      parameters:
+      - description: Ticket ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CreateTicketRequest'
+      summary: Delete ticket
+    get:
+      consumes:
+      - application/json
+      description: Get a ticket by its ID
+      parameters:
+      - description: Ticket ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TicketResponse'
+      summary: Get ticket by ID
+    put:
+      consumes:
+      - application/json
+      description: Update an existing ticket
+      parameters:
+      - description: Ticket ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Ticket
+        in: body
+        name: ticket
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTicketRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CreateTicketRequest'
+      summary: Update ticket
+  /api/tickets/{id}/assign:
+    post:
+      consumes:
+      - application/json
+      description: Assign a ticket to an admin
+      parameters:
+      - description: Ticket ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Admin ID
+        in: path
+        name: admin_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CreateTicketRequest'
+      summary: Assign ticket
+  /api/users:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ListUser'
+            type: array
+      summary: Get all users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user (admin or student)
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ListUser'
+      summary: Create user
+swagger: "2.0"

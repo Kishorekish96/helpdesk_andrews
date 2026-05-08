@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html class="dark">
+<head>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+tailwind.config = { darkMode: 'class' }
+</script>
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-900 transition duration-500">
+
+<!-- HEADER -->
+<div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-6 flex justify-between items-center shadow-lg">
+  <div>
+    <h1 class="text-3xl font-bold">👨‍🎓 Student Dashboard</h1>
+    <p class="text-sm opacity-80">Raise and track your issues</p>
+  </div>
+
+  <button onclick="toggleDark()" class="bg-black/30 px-4 py-2 rounded-lg">
+    🌙
+  </button>
+</div>
+
+<div class="p-6 grid grid-cols-2 gap-6">
+
+<!-- CREATE TICKET -->
+<div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:scale-105 transition">
+
+  <h3 class="font-semibold mb-4 text-gray-800 dark:text-gray-200">
+  Create Ticket
+</h3>
+
+  <input id="studentId" placeholder="Student ID"
+    class="border p-2 w-full mb-2 rounded dark:bg-gray-700 dark:text-white">
+
+  <input id="title" placeholder="Title"
+    class="border p-2 w-full mb-2 rounded dark:bg-gray-700 dark:text-white">
+
+  <input id="desc" placeholder="Description"
+    class="border p-2 w-full mb-2 rounded dark:bg-gray-700 dark:text-white">
+
+  <select id="category"
+    class="border p-2 w-full mb-2 rounded dark:bg-gray-700 dark:text-white">
+    <option value="">Category</option>
+    <option value="IT">IT</option>
+    <option value="Hostel">Hostel</option>
+    <option value="Academic">Academic</option>
+  </select>
+
+  <button onclick="createTicket()"
+    class="bg-blue-500 text-white px-4 py-2 rounded w-full hover:bg-blue-600 transition">
+    Submit Ticket
+  </button>
+
+</div>
+
+<!-- MY TICKETS -->
+<div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+
+  <h3 class="font-semibold mb-4 text-gray-800 dark:text-gray-200">
+  My Tickets
+</h3>
+
+  <div id="tickets"></div>
+
+</div>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="fixed bottom-5 right-5 hidden bg-black text-white px-4 py-2 rounded shadow-lg"></div>
+
+<script>
+const API = "http://localhost:8080/api";
+
+// Dark mode
+function toggleDark() {
+  document.documentElement.classList.toggle("dark");
+}
+
+// Toast
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.innerText = msg;
+  t.classList.remove("hidden");
+  setTimeout(() => t.classList.add("hidden"), 2000);
+}
+
+// Create Ticket
+async function createTicket() {
+  await fetch(API + "/tickets", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      title: title.value,
+      description: desc.value,
+      category: category.value,
+      student_id: parseInt(studentId.value)
+    })
+  });
+
+  showToast("Ticket Created 🎉");
+  loadMyTickets();
+}
+
+// Load My Tickets
+async function loadMyTickets() {
+  const id = document.getElementById("studentId").value;
+  if (!id) return;
+
+  const res = await fetch(API + "/tickets");
+  const data = await res.json();
+
+  const my = data.filter(t => t.student_id == id);
+
+  tickets.innerHTML = "";
+
+  my.forEach(t => {
+    tickets.innerHTML += `
+    <div class="p-3 mb-2 rounded bg-gray-100 dark:bg-gray-700">
+      <p class="font-semibold">${t.title}</p>
+      <p class="text-sm">${t.status}</p>
+    </div>`;
+  });
+}
+
+// Auto reload when ID changes
+document.getElementById("studentId").addEventListener("input", loadMyTickets);
+
+</script>
+
+</body>
+</html>

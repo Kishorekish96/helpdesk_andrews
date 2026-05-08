@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Helpdesk Login</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body class="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 h-screen flex items-center justify-center text-white">
+
+<div class="w-[900px] bg-white/10 backdrop-blur-xl p-8 rounded-2xl shadow-2xl">
+
+  <!-- Title -->
+  <h1 class="text-4xl font-bold text-center mb-2">🎫 Helpdesk System</h1>
+  <p class="text-center text-gray-200 mb-8">Smart Issue Management Platform</p>
+
+  <!-- Role Selection -->
+  <div class="grid grid-cols-3 gap-6 mb-8">
+
+    <div onclick="selectRole('student', this)"
+      class="roleCard cursor-pointer p-6 rounded-xl bg-white/20 hover:bg-white/30 transition text-center border border-white/20 hover:scale-105">
+      <div class="text-4xl mb-2">👨‍🎓</div>
+      <h2 class="font-semibold">Student</h2>
+    </div>
+
+    <div onclick="selectRole('admin', this)"
+      class="roleCard cursor-pointer p-6 rounded-xl bg-white/20 hover:bg-white/30 transition text-center border border-white/20 hover:scale-105">
+      <div class="text-4xl mb-2">👨‍💼</div>
+      <h2 class="font-semibold">Admin</h2>
+    </div>
+
+    <div onclick="selectRole('super', this)"
+      class="roleCard cursor-pointer p-6 rounded-xl bg-white/20 hover:bg-white/30 transition text-center border border-white/20 hover:scale-105">
+      <div class="text-4xl mb-2">👑</div>
+      <h2 class="font-semibold">Super Admin</h2>
+    </div>
+
+  </div>
+
+  <!-- Login Form -->
+  <div class="grid grid-cols-2 gap-4">
+
+    <input id="userId" placeholder="Enter User ID"
+      class="p-3 rounded-lg bg-white/20 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-white">
+
+    <!-- Department -->
+    <select id="department"
+      class="hidden p-3 rounded-lg bg-white/80 text-gray-900 backdrop-blur-md focus:outline-none">
+      <option value="">Select Department</option>
+      <option value="IT">IT</option>
+      <option value="Hostel">Hostel</option>
+      <option value="Academic">Academic</option>
+    </select>
+
+  </div>
+
+  <!-- Button -->
+  <button onclick="login()"
+    class="w-full mt-6 bg-white text-indigo-600 py-3 rounded-lg font-bold hover:scale-105 transition">
+    Enter Dashboard →
+  </button>
+
+</div>
+
+<script>
+let selectedRole = ""
+
+function selectRole(role, el) {
+  selectedRole = role
+
+  // reset styles
+  document.querySelectorAll(".roleCard").forEach(card => {
+    card.classList.remove("ring-4", "ring-white", "scale-105")
+  })
+
+  // highlight selected
+  el.classList.add("ring-4", "ring-white", "scale-105")
+
+  // department visibility
+  const dept = document.getElementById("department")
+  if (role === "admin") {
+    dept.classList.remove("hidden")
+  } else {
+    dept.classList.add("hidden")
+  }
+}
+
+// Login
+function login() {
+  const userId = document.getElementById("userId").value
+  const dept = document.getElementById("department").value
+
+  if (!selectedRole) {
+    Swal.fire("Select Role", "Please choose a role", "warning")
+    return
+  }
+
+  if (!userId) {
+    Swal.fire("Missing ID", "Enter your user ID", "error")
+    return
+  }
+
+  if (selectedRole === "admin" && !dept) {
+    Swal.fire("Select Department", "Admin must choose department", "warning")
+    return
+  }
+
+  // Save session
+  localStorage.setItem("userId", userId)
+  localStorage.setItem("role", selectedRole)
+  localStorage.setItem("department", dept)
+
+  Swal.fire({
+    icon: "success",
+    title: "Login Successful 🎉",
+    showConfirmButton: false,
+    timer: 1200
+  })
+
+  setTimeout(() => {
+    if (selectedRole === "student") {
+      window.location = "student.html"
+    } else if (selectedRole === "admin") {
+      window.location = "admin.html"
+    } else {
+      window.location = "super-admin.html"
+    }
+  }, 1200)
+}
+</script>
+
+</body>
+</html>

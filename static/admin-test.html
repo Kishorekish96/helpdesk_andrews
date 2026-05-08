@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html class="dark">
+<head>
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+</head>
+
+<body class="bg-gradient-to-br from-indigo-100 to-purple-200 dark:from-gray-900 dark:to-gray-800 transition">
+
+<!-- HEADER -->
+<div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 flex justify-between items-center shadow-lg">
+  <div>
+    <h1 class="text-3xl font-bold">👨‍💼 Admin Dashboard</h1>
+    <p class="text-sm opacity-90">
+      Department: <span id="deptName" class="font-semibold"></span>
+    </p>
+  </div>
+
+  <button onclick="toggleDark()" class="bg-black/30 px-4 py-2 rounded-lg hover:scale-105 transition">
+    🌙 Toggle
+  </button>
+</div>
+
+<div class="p-6 max-w-6xl mx-auto">
+
+  <!-- STATS -->
+  <div class="grid grid-cols-3 gap-6 mb-6">
+
+    <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow border dark:border-gray-700">
+      <p class="text-gray-500 dark:text-gray-400">Total Tickets</p>
+      <h2 id="total" class="text-3xl font-bold text-gray-900 dark:text-white">0</h2>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow border dark:border-gray-700">
+      <p class="text-yellow-500">In Progress</p>
+      <h2 id="progress" class="text-3xl font-bold text-gray-900 dark:text-white">0</h2>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow border dark:border-gray-700">
+      <p class="text-green-500">Resolved</p>
+      <h2 id="resolved" class="text-3xl font-bold text-gray-900 dark:text-white">0</h2>
+    </div>
+
+  </div>
+
+  <!-- TICKETS -->
+  <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow border dark:border-gray-700">
+
+    <h2 class="font-bold text-lg mb-4 text-gray-900 dark:text-white">
+      📌 Department Tickets
+    </h2>
+
+    <div id="tickets" class="grid gap-4"></div>
+
+  </div>
+
+</div>
+
+<script>
+const API = "http://localhost:8080/api/tickets"
+const dept = localStorage.getItem("department")
+
+document.getElementById("deptName").innerText = dept || "N/A"
+
+// Dark mode
+function toggleDark() {
+  document.documentElement.classList.toggle("dark")
+}
+
+// Badge
+function badge(status) {
+  if (status === "open")
+    return `<span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-semibold">Open</span>`
+  if (status === "in-progress")
+    return `<span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-semibold">In Progress</span>`
+  return `<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-semibold">Resolved</span>`
+}
+
+// Load tickets
+async function loadTickets() {
+
+  const res = await fetch(API)
+  const data = await res.json()
+
+  const filtered = data.filter(t => t.category === dept)
+
+  tickets.innerHTML = `
+  <div class="text-center py-12 animate-pulse">
+    <div class="text-5xl">🎫</div>
+    <p class="mt-2 text-gray-500 dark:text-gray-300">No tickets assigned yet</p>
+  </div>
+`
+
+  let total = filtered.length
+  let progress = 0
+  let resolved = 0
+
+  
+
+  filtered.forEach(t => {
+
+    if (t.status === "in-progress") progress++
+    if (t.status === "resolved") resolved++
+
+    tickets.innerHTML += `
+    <div class="p-5 rounded-xl bg-white dark:bg-gray-700 shadow border border-gray-200 dark:border-gray-600 hover:scale-[1.01] transition">
+
+      <!-- TOP -->
+      <div class="flex justify-between items-center mb-2">
+        <h3 class="font-bold text-lg text-gray-900 dark:text-white">
+          ${t.title}
+        </h3>
+        ${badge(t.status)}
+      </div>
+
+      <!-- DESCRIPTION -->
+      <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
+        ${t.description}
+      </p>
+
+      <!-- DETAILS -->
+      <div class="grid grid-cols-2 gap-2 text-sm text-gray-600 dark:text-gray-300">
+
+        <div>👨‍🎓 <b>Student:</b> ${t.Student?.name || "Unknown"}</div>
+        <div>📂 <b>Category:</b> ${t.category}</div>
+        <div>🆔 <b>Ticket ID:</b> ${t.ID}</div>
+        <div>📌 <b>Status:</b> ${t.status}</div>
+
+      </div>
+
+    </div>
+    `
+  })
+
+  document.getElementById("total").innerText = total
+  document.getElementById("progress").innerText = progress
+  document.getElementById("resolved").innerText = resolved
+}
+
+loadTickets()
+</script>
+
+</body>
+</html>
